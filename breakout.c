@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
 #include <SDL3/SDL.h>
@@ -6,11 +7,41 @@
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
 
-int main()
+bool is_rect_collide(SDL_FRect a, SDL_FRect b)
+{
+	return 
+		a.x < b.x + b.w &&
+		a.x + a.w > b.x &&
+		a.y < b.y + b.w &&
+		a.y + a.h > b.y;
+}
+
+bool is_rect_wall_collide(SDL_FRect a)
+{
+	return
+		a.x + a.w >= WIN_WIDTH ||
+		a.x <= 0 ||
+		a.y + a.h >= WIN_HEIGHT ||
+		a.y < 0;
+}
+
+void rect_translate(SDL_FRect *a, float x, float y)
+{
+	a->x += x;
+	a->y += y;
+}
+
+void ball_update(SDL_FRect *ball, float direction)
+{
+	rect_translate(ball, 1 * direction, -1 * direction);
+}
+
+int main(void)
 {
 	SDL_Window *window = NULL;
 	SDL_Renderer *renderer = NULL;
 	bool done = false;
+	bool at_starting_game = true;
 
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not init sdl: %s\n", SDL_GetError());
@@ -39,6 +70,7 @@ int main()
 		.h = 15,
 	};
 	ball.y = paddle.y - ball.h;
+	float direction = 0;
 	// ==========
 
 	// ========== MOUSE
@@ -68,6 +100,15 @@ int main()
 				case SDL_EVENT_MOUSE_MOTION:
 					mouse_x = event.motion.x;
 					break;
+				case SDL_EVENT_MOUSE_BUTTON_DOWN:
+					switch (event.button.button) 
+					{
+						case 1:
+							at_starting_game = false;
+							direction = 1;
+							break;
+					}
+					break;
 			}
 		}
 
@@ -78,7 +119,20 @@ int main()
 		SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
 		SDL_RenderFillRect(renderer, &paddle);
 
-		ball.x = paddle.x + (paddle.w / 2) - (ball.w / 2);
+		if (at_starting_game)
+			ball.x = paddle.x + (paddle.w / 2) - (ball.w / 2);
+		else
+			ball_update(&ball, direction);
+
+		if (ball.y + ball.h >= WIN_HEIGHT) {
+			// TODO: Game over instead of quit
+			done = true;
+		}
+
+		if (is_rect_wall_collide(ball) || is_rect_collide(ball, paddle)) {
+			direction *= -1;
+		}
+
 		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0x00);
 		SDL_RenderFillRect(renderer, &ball);
 
