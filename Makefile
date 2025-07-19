@@ -1,7 +1,7 @@
 CC = cc 
 CFLAGS = -Wall -Wextra
 
-SRCS = breakout.c
+SRCS = breakout.c rect.c
 TARGET = breakout
 
 $(TARGET): $(SRCS)
