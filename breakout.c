@@ -22,6 +22,13 @@ int main()
 		return 1;
 	}
 
+	SDL_FRect paddle = {
+		.w = 150,
+		.h = 15,
+	};
+	paddle.x = WIN_WIDTH / 2 - paddle.w / 2;
+	paddle.y = WIN_HEIGHT - WIN_HEIGHT / 4;
+
 	while (!done) {
 		SDL_Event event;
 		
@@ -47,6 +54,10 @@ int main()
 
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
 		SDL_RenderClear(renderer);
+
+		SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
+		SDL_RenderFillRect(renderer, &paddle);
+
 		SDL_RenderPresent(renderer);
 	}
 
