@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <math.h>
 #include <SDL3/SDL.h>
 
 #define WIN_TITLE "breakout"
@@ -22,12 +23,16 @@ int main()
 		return 1;
 	}
 
+	// ========== PADDLE
 	SDL_FRect paddle = {
 		.w = 150,
 		.h = 15,
 	};
 	paddle.x = WIN_WIDTH / 2 - paddle.w / 2;
 	paddle.y = WIN_HEIGHT - WIN_HEIGHT / 4;
+
+	// ========== MOUSE
+	float mouse_x = 0;
 
 	while (!done) {
 		SDL_Event event;
@@ -49,12 +54,16 @@ int main()
 					break;
 				case SDL_EVENT_KEY_UP:
 					break;
+				case SDL_EVENT_MOUSE_MOTION:
+					mouse_x = event.motion.x;
+					break;
 			}
 		}
 
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
 		SDL_RenderClear(renderer);
 
+		paddle.x = fmin((double)mouse_x, (double)WIN_WIDTH - paddle.w);
 		SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
 		SDL_RenderFillRect(renderer, &paddle);
 
