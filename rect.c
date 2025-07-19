@@ -79,7 +79,7 @@ bool is_rect_collide(SDL_FRect a, SDL_FRect b)
 	return 
 		a.x <= b.x + b.w &&
 		a.x + a.w >= b.x &&
-		a.y <= b.y + b.w &&
+		a.y <= b.y + b.h &&
 		a.y + a.h >= b.y;
 }
 
@@ -112,4 +112,26 @@ void rect_translate(SDL_FRect *a, float x, float y)
 {
 	a->x += x;
 	a->y += y;
+}
+
+void brick_init(int rows, int cols, Brick bricks[][cols], float win_width)
+{
+	float brick_w = win_width / cols;
+	float brick_h = 15.0f;
+	for (int y = 0; y < rows; ++y) {
+		for (int x = 0; x < cols; ++x) {
+			float brick_x = x * brick_w;
+			float brick_y = y * brick_h;
+			SDL_FRect brick = {
+				.x = brick_x,
+				.y = brick_y,
+				.w = brick_w,
+				.h = brick_h
+			};
+			bricks[y][x] = (Brick){
+				.brick = brick,
+				.hit = false,
+			};
+		}
+	}
 }

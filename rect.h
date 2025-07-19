@@ -29,4 +29,12 @@ void vector2f_randomize(Vector2f *vector, float bound);
 void surface_normal_wall_get(SDL_FRect a, Vector2f *surface_normal, float win_width);
 void rect_translate(SDL_FRect *a, float x, float y);
 
+
+typedef struct {
+	SDL_FRect brick;
+	bool hit;
+} Brick;
+
+void brick_init(int rows, int cols, Brick bricks[][cols], float win_width);
+
 #endif // RECT_H_

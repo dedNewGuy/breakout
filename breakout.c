@@ -45,8 +45,12 @@ int main(void)
 	paddle.x = WIN_WIDTH / 2 - paddle.w / 2;
 	paddle.y = WIN_HEIGHT - WIN_HEIGHT / 4;
 	// ==========
-	
-	
+
+	int brick_rows = 10;
+	int brick_cols = 20;
+	Brick bricks[brick_rows][brick_cols];
+	brick_init(brick_rows, brick_cols, bricks, WIN_WIDTH);
+
 	// ========== BALL
 	SDL_FRect ball = {
 		.w = 15,
@@ -124,6 +128,26 @@ int main(void)
 
 		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0x00);
 		SDL_RenderFillRect(renderer, &ball);
+
+		for (int y = 0; y < brick_rows; ++y) {
+			for (int x = 0; x < brick_cols; ++x) {
+				SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0x00);
+				SDL_RenderFillRect(renderer, &bricks[y][x].brick);
+
+				SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0x00, 0x00);
+				SDL_RenderRect(renderer, &bricks[y][x].brick);
+			}
+		}
+
+		for (int y = 0; y < brick_rows; ++y) {
+			for (int x = 0; x < brick_cols; ++x) {
+				if (is_rect_collide(ball, bricks[y][x].brick)) {
+					surface_normal.x = 0;
+					surface_normal.y = -1;
+					ball_direction = ball_reflection_direction(ball_direction, surface_normal);
+				}
+			}
+		}
 
 		SDL_RenderPresent(renderer);
 	}
