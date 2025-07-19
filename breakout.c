@@ -1,11 +1,35 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
 #include <math.h>
 #include <SDL3/SDL.h>
 
 #define WIN_TITLE "breakout"
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
+
+typedef struct {
+	float x;
+	float y;
+} Vector2f;
+
+void vector2f_randomize(Vector2f *vector, float bound)
+{
+	vector->x = (float)rand() / RAND_MAX * bound;
+	vector->y = (float)rand() / RAND_MAX * bound;
+}
+
+Vector2f vector2f_normalize(Vector2f vector)
+{
+	float magnitude = (vector.x * vector.x) + (vector.y* vector.y);
+	magnitude = sqrtf(magnitude);
+
+	return (Vector2f){
+		.x = vector.x / magnitude,
+		.y = vector.y / magnitude,
+	};
+}
 
 bool is_rect_collide(SDL_FRect a, SDL_FRect b)
 {
@@ -31,13 +55,14 @@ void rect_translate(SDL_FRect *a, float x, float y)
 	a->y += y;
 }
 
-void ball_update(SDL_FRect *ball, float direction)
+void ball_update(SDL_FRect *ball, Vector2f direction)
 {
-	rect_translate(ball, 1 * direction, -1 * direction);
+	rect_translate(ball, 1 * direction.x, -1 * direction.y);
 }
 
 int main(void)
 {
+	srand(time(NULL));
 	SDL_Window *window = NULL;
 	SDL_Renderer *renderer = NULL;
 	bool done = false;
@@ -70,7 +95,7 @@ int main(void)
 		.h = 15,
 	};
 	ball.y = paddle.y - ball.h;
-	float direction = 0;
+	Vector2f ball_direction;
 	// ==========
 
 	// ========== MOUSE
@@ -105,7 +130,8 @@ int main(void)
 					{
 						case 1:
 							at_starting_game = false;
-							direction = 1;
+							vector2f_randomize(&ball_direction, 1.0f);
+							ball_direction = vector2f_normalize(ball_direction);
 							break;
 					}
 					break;
@@ -122,7 +148,7 @@ int main(void)
 		if (at_starting_game)
 			ball.x = paddle.x + (paddle.w / 2) - (ball.w / 2);
 		else
-			ball_update(&ball, direction);
+			ball_update(&ball, ball_direction);
 
 		if (ball.y + ball.h >= WIN_HEIGHT) {
 			// TODO: Game over instead of quit
@@ -130,7 +156,8 @@ int main(void)
 		}
 
 		if (is_rect_wall_collide(ball) || is_rect_collide(ball, paddle)) {
-			direction *= -1;
+			ball_direction.x *= -1;
+			ball_direction.y *= -1;
 		}
 
 		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0x00);
