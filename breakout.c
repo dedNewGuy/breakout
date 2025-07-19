@@ -131,20 +131,26 @@ int main(void)
 
 		for (int y = 0; y < brick_rows; ++y) {
 			for (int x = 0; x < brick_cols; ++x) {
-				SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0x00);
-				SDL_RenderFillRect(renderer, &bricks[y][x].brick);
+				Brick brick = bricks[y][x];
+				if (!brick.hit) {
+					SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0x00);
+					SDL_RenderFillRect(renderer, &brick.brick);
 
-				SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0x00, 0x00);
-				SDL_RenderRect(renderer, &bricks[y][x].brick);
+					SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0x00, 0x00);
+					SDL_RenderRect(renderer, &brick.brick);
+				}
 			}
 		}
 
 		for (int y = 0; y < brick_rows; ++y) {
 			for (int x = 0; x < brick_cols; ++x) {
-				if (is_rect_collide(ball, bricks[y][x].brick)) {
+				Brick brick = bricks[y][x];
+				if (is_rect_collide(ball, brick.brick) && !brick.hit) {
 					surface_normal.x = 0;
 					surface_normal.y = -1;
 					ball_direction = ball_reflection_direction(ball_direction, surface_normal);
+					bricks[y][x].hit = true;
+					break;
 				}
 			}
 		}
