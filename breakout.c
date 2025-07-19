@@ -26,8 +26,22 @@ int main()
 		SDL_Event event;
 		
 		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_EVENT_QUIT) {
-				done = true;
+			switch (event.type) {
+				case SDL_EVENT_QUIT:
+					done = true;
+					break;
+				case SDL_EVENT_KEY_DOWN:
+					SDL_Scancode key_code = event.key.scancode; 
+					switch (key_code) {
+						case SDL_SCANCODE_Q:
+							done = true;
+							break;
+						default:
+							break;
+					}
+					break;
+				case SDL_EVENT_KEY_UP:
+					break;
 			}
 		}
 
