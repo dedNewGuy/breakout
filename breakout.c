@@ -30,9 +30,20 @@ int main()
 	};
 	paddle.x = WIN_WIDTH / 2 - paddle.w / 2;
 	paddle.y = WIN_HEIGHT - WIN_HEIGHT / 4;
+	// ==========
+	
+	
+	// ========== BALL
+	SDL_FRect ball = {
+		.w = 15,
+		.h = 15,
+	};
+	ball.y = paddle.y - ball.h;
+	// ==========
 
 	// ========== MOUSE
 	float mouse_x = 0;
+	// ==========
 
 	while (!done) {
 		SDL_Event event;
@@ -66,6 +77,10 @@ int main()
 		paddle.x = fmin((double)mouse_x, (double)WIN_WIDTH - paddle.w);
 		SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
 		SDL_RenderFillRect(renderer, &paddle);
+
+		ball.x = paddle.x + (paddle.w / 2) - (ball.w / 2);
+		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0x00);
+		SDL_RenderFillRect(renderer, &ball);
 
 		SDL_RenderPresent(renderer);
 	}
