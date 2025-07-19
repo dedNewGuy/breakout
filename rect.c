@@ -75,11 +75,12 @@ Vector2f vector2f_mul(Vector2f a, Vector2f b)
 
 bool is_rect_collide(SDL_FRect a, SDL_FRect b)
 {
+	// TODO: Fix collision
 	return 
-		a.x < b.x + b.w &&
-		a.x + a.w > b.x &&
-		a.y < b.y + b.w &&
-		a.y + a.h > b.y;
+		a.x <= b.x + b.w &&
+		a.x + a.w >= b.x &&
+		a.y <= b.y + b.w &&
+		a.y + a.h >= b.y;
 }
 
 bool is_rect_wall_collide(SDL_FRect a, float win_width, float win_height)
