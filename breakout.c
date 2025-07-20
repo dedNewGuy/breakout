@@ -11,9 +11,13 @@
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
 
-void ball_update(SDL_FRect *ball, Vector2f direction)
+#define FPS 60
+#define FRAMERATE (1000 / FPS)
+
+void ball_update(SDL_FRect *ball, Vector2f direction, float deltatime)
 {
-	rect_translate(ball, 1 * direction.x, -1 * direction.y);
+	float speed = 500.0f * deltatime;
+	rect_translate(ball, speed * direction.x, -speed * direction.y);
 }
 
 int main(void)
@@ -60,13 +64,17 @@ int main(void)
 	Vector2f ball_direction;
 	// ==========
 
-	// ========== MOUSE
+	// ========== GENERAL SETTING
 	float mouse_x = 0;
+	int last_frame_time = 0;
+	float deltatime = 0;
 	// ==========
 
+
 	while (!done) {
+
+
 		SDL_Event event;
-		
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_EVENT_QUIT:
@@ -100,6 +108,17 @@ int main(void)
 			}
 		}
 
+		// CAP FRAMERATE
+		int time_to_wait = FRAMERATE - (SDL_GetTicks() - last_frame_time);
+
+		if (time_to_wait > 0 && time_to_wait <= FRAMERATE) 
+			SDL_Delay(time_to_wait);
+
+		deltatime = (SDL_GetTicks() - last_frame_time) / 1000.0f;
+		// printf("deltatime: %f\n", deltatime);
+
+		last_frame_time = SDL_GetTicks();
+
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
 		SDL_RenderClear(renderer);
 
@@ -110,7 +129,7 @@ int main(void)
 		if (at_starting_game)
 			ball.x = paddle.x + (paddle.w / 2) - (ball.w / 2);
 		else
-			ball_update(&ball, ball_direction);
+			ball_update(&ball, ball_direction, deltatime);
 
 		if (ball.y + ball.h >= WIN_HEIGHT) {
 			// TODO: Game over instead of quit
