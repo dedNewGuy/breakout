@@ -28,3 +28,6 @@ make && ./breakout
 #or
 make run
 ```
+
+## TODO
+- [ ] Add game over and handle if win
