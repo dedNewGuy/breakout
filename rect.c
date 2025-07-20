@@ -75,7 +75,6 @@ Vector2f vector2f_mul(Vector2f a, Vector2f b)
 
 bool is_rect_collide(SDL_FRect a, SDL_FRect b)
 {
-	// TODO: Fix collision
 	return 
 		a.x <= b.x + b.w &&
 		a.x + a.w >= b.x &&

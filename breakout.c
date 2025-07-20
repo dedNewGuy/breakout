@@ -16,7 +16,7 @@
 
 void ball_update(SDL_FRect *ball, Vector2f direction, float deltatime)
 {
-	float speed = 500.0f * deltatime;
+	float speed = 400.0f * deltatime;
 	rect_translate(ball, speed * direction.x, -speed * direction.y);
 }
 
@@ -72,8 +72,6 @@ int main(void)
 
 
 	while (!done) {
-
-
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -110,13 +108,10 @@ int main(void)
 
 		// CAP FRAMERATE
 		int time_to_wait = FRAMERATE - (SDL_GetTicks() - last_frame_time);
-
 		if (time_to_wait > 0 && time_to_wait <= FRAMERATE) 
 			SDL_Delay(time_to_wait);
-
 		deltatime = (SDL_GetTicks() - last_frame_time) / 1000.0f;
 		// printf("deltatime: %f\n", deltatime);
-
 		last_frame_time = SDL_GetTicks();
 
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
@@ -138,12 +133,36 @@ int main(void)
 
 		if (is_rect_wall_collide(ball, WIN_WIDTH, WIN_HEIGHT)) {
 			surface_normal_wall_get(ball, &surface_normal, WIN_WIDTH);
-			ball_direction = ball_reflection_direction(ball_direction, surface_normal);
 		} else if (is_rect_collide(ball, paddle)) {
+			
+			// Resolve overlapping
+			float overlapLeft = (ball.x + ball.w) - paddle.x;
+			float overlapRight = (paddle.x + paddle.w) - ball.x;
+			float overlapTop = (ball.y + ball.h) - paddle.y;
+			float overlapBottom = (paddle.y + paddle.h) - ball.y;
+
+			float xOverlap = (overlapLeft < overlapRight) ? overlapLeft : -overlapRight;
+			float yOverlap = (overlapTop < overlapBottom) ? overlapTop : -overlapBottom;
+
+			if (fabsf(xOverlap) < fabsf(yOverlap)) {
+				ball.x -= xOverlap;
+				if (xOverlap == overlapLeft) {
+					surface_normal.x = -1;
+					surface_normal.y = 0;
+				} else {
+					surface_normal.x = 1;
+					surface_normal.y = 0;
+				}
+			} else {
+				ball.y -= yOverlap;
+				surface_normal.x = 0;
+				surface_normal.y = -1;
+			}
+		} else {
 			surface_normal.x = 0;
-			surface_normal.y = -1;
-			ball_direction = ball_reflection_direction(ball_direction, surface_normal);
+			surface_normal.y = 0;
 		}
+		ball_direction = ball_reflection_direction(ball_direction, surface_normal);
 
 		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0x00);
 		SDL_RenderFillRect(renderer, &ball);
@@ -165,8 +184,29 @@ int main(void)
 			for (int x = 0; x < brick_cols; ++x) {
 				Brick brick = bricks[y][x];
 				if (is_rect_collide(ball, brick.brick) && !brick.hit) {
-					surface_normal.x = 0;
-					surface_normal.y = -1;
+					float overlapLeft = (ball.x + ball.w) - brick.brick.x;
+					float overlapRight = (brick.brick.x + brick.brick.w) - ball.x;
+					float overlapTop = (ball.y + ball.h) - brick.brick.y;
+					float overlapBottom = (brick.brick.y + brick.brick.h) - ball.y;
+
+					float xOverlap = (overlapLeft < overlapRight) ? overlapLeft : -overlapRight;
+					float yOverlap = (overlapTop < overlapBottom) ? overlapTop : -overlapBottom;
+
+					if (fabsf(xOverlap) < fabsf(yOverlap)) {
+						ball.x -= xOverlap;
+						if (xOverlap == overlapLeft) {
+							surface_normal.x = -1;
+							surface_normal.y = 0;
+						} else {
+							surface_normal.x = 1;
+							surface_normal.y = 0;
+						}
+					} else {
+						ball.y -= yOverlap;
+						surface_normal.x = 0;
+						surface_normal.y = -1;
+					}
+
 					ball_direction = ball_reflection_direction(ball_direction, surface_normal);
 					bricks[y][x].hit = true;
 					break;
